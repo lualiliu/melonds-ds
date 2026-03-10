@@ -218,9 +218,9 @@ void MelonDsDs::CoreState::Run() noexcept {
         }
 
         _renderState.Render(nds, _inputState, Config, _screenLayout, skipPresent);
-        if (!skipPresent) {
-            RenderAudio(*Console);
-        }
+        // Always submit audio every frame so playback stays smooth when frameskipping;
+        // the frontend plays from its own buffer asynchronously.
+        RenderAudio(*Console);
         ++_frameCounter;
 
         retro::task::check();

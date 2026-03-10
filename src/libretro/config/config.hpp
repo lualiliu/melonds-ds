@@ -423,7 +423,7 @@ namespace MelonDsDs {
     private:
         void CustomizeFirmware(melonDS::Firmware& firmware);
         EmulationProfile _profile = EmulationProfile::Accurate;
-        FrameskipMode _frameskip = FrameskipMode::Off;
+        FrameskipMode _frameskip = FrameskipMode::Auto;
         bool _audioFastMode = false;
         bool _videoFastMode = false;
         bool _jitFastPreset = false;

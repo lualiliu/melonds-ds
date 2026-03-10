@@ -61,7 +61,7 @@ namespace MelonDsDs::config::definitions {
             {config::values::AUTO, "Auto"},
             {nullptr, nullptr},
         },
-        config::values::OFF,
+        config::values::AUTO,
     };
 
     constexpr retro_core_option_v2_definition AudioFastMode {

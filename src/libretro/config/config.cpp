@@ -177,8 +177,8 @@ static void MelonDsDs::config::ParsePerformanceOptions(CoreConfig& config) noexc
     if (optional<FrameskipMode> value = ParseFrameskipMode(get_variable(FRAMESKIP))) {
         config.SetFrameskip(*value);
     } else {
-        retro::warn("Failed to get value for {}; defaulting to {}", FRAMESKIP, values::OFF);
-        config.SetFrameskip(FrameskipMode::Off);
+        retro::warn("Failed to get value for {}; defaulting to {}", FRAMESKIP, values::AUTO);
+        config.SetFrameskip(FrameskipMode::Auto);
     }
 
     if (optional<bool> value = ParseBoolean(get_variable(AUDIO_FAST_MODE))) {
