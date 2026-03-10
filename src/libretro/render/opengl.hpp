@@ -51,7 +51,8 @@ namespace MelonDsDs {
             melonDS::NDS& nds,
             const InputState& input,
             const CoreConfig& config,
-            const ScreenLayoutData& screenLayout
+            const ScreenLayoutData& screenLayout,
+            bool skipPresent
         ) noexcept override;
         // Requests that the OpenGL context be refreshed.
         void RequestRefresh() noexcept override {

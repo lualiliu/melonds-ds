@@ -30,6 +30,7 @@
 
 #include "console/dsi.hpp"
 #include "constants.hpp"
+#include "../environment.hpp"
 #include "../config/console.hpp"
 #include "../exceptions.hpp"
 #include "../format.hpp"
@@ -186,8 +187,41 @@ void MelonDsDs::CoreState::Run() noexcept {
             nds.RunFrame();
         }
 
-        _renderState.Render(nds, _inputState, Config, _screenLayout);
-        RenderAudio(*Console);
+        bool skipPresent = false;
+        switch (Config.EffectiveFrameskip()) {
+            case FrameskipMode::Off:
+                skipPresent = false;
+                _consecutiveSkippedPresents = 0;
+                break;
+            case FrameskipMode::_1:
+                skipPresent = (_frameCounter % 2) != 0;
+                break;
+            case FrameskipMode::_2:
+                skipPresent = (_frameCounter % 3) != 0;
+                break;
+            case FrameskipMode::Auto: {
+                const auto frameTimeOpt = retro::last_frame_time();
+                int64_t frameTimeUs = frameTimeOpt ? frameTimeOpt->count() : US_PER_FRAME.count();
+                if (frameTimeUs <= 0) frameTimeUs = US_PER_FRAME.count();
+                const bool slow = frameTimeUs > (US_PER_FRAME.count() * 11) / 10;
+                if (slow && _consecutiveSkippedPresents < 2) {
+                    skipPresent = true;
+                }
+                break;
+            }
+        }
+
+        if (skipPresent) {
+            ++_consecutiveSkippedPresents;
+        } else {
+            _consecutiveSkippedPresents = 0;
+        }
+
+        _renderState.Render(nds, _inputState, Config, _screenLayout, skipPresent);
+        if (!skipPresent) {
+            RenderAudio(*Console);
+        }
+        ++_frameCounter;
 
         retro::task::check();
     }

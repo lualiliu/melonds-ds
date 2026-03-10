@@ -25,6 +25,7 @@ add_library(melondsds_libretro ${LIBRARY_TYPE}
     config/definitions/firmware.hpp
     config/definitions/network.hpp
     config/definitions/osd.hpp
+    config/definitions/performance.hpp
     config/definitions/screen.hpp
     config/definitions/system.hpp
     config/definitions/video.hpp

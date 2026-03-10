@@ -257,6 +257,20 @@ _but melonDS DS will not support these platforms unless there's enough demand_.
 
 See the [contributor's guide](CONTRIBUTING.md) for instructions on building melonDS DS.
 
+## Speed-first (DraStic-style) patches (developer)
+
+This repository can apply local patches to its upstream FetchContent dependencies.
+These patches add aggressive, speed-first emulation knobs intended to trade correctness for performance.
+
+- **Patches directory**: `third_party/melonds/patches/`
+- **CMake option**: `MELONDSDS_APPLY_UPSTREAM_PATCHES` (default: `ON`)
+
+To configure a pristine upstream build without local modifications:
+
+```bash
+cmake -S . -B build -DMELONDSDS_APPLY_UPSTREAM_PATCHES=OFF
+```
+
 # About the Name
 
 Various games received enhanced remakes or ports to the Nintendo DS, including such gems as:

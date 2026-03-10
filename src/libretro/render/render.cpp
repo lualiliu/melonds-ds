@@ -37,10 +37,11 @@ void MelonDsDs::RenderStateWrapper::Render(
     melonDS::NDS& nds,
     const InputState& input,
     const CoreConfig& config,
-    const ScreenLayoutData& screenLayout
+    const ScreenLayoutData& screenLayout,
+    bool skipPresent
 ) noexcept {
     if (_renderState) {
-        _renderState->Render(nds, input, config, screenLayout);
+        _renderState->Render(nds, input, config, screenLayout, skipPresent);
     }
 }
 

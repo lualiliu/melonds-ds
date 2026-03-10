@@ -1,0 +1,70 @@
+diff --git a/src/ARMJIT.cpp b/src/ARMJIT.cpp
+index 1ebcce8e..e3f03b47 100644
+--- a/src/ARMJIT.cpp
++++ b/src/ARMJIT.cpp
+@@ -488,11 +488,15 @@ void ARMJIT::SetJITArgs(JITArgs args) noexcept
+     if (MaxBlockSize != args.MaxBlockSize
+         || LiteralOptimizations != args.LiteralOptimizations
+         || BranchOptimizations != args.BranchOptimizations
++        || DirectBlockLinking9 != args.DirectBlockLinking9
++        || DirectBlockLinking7 != args.DirectBlockLinking7
+         || FastMemory != args.FastMemory)
+         ResetBlockCache();
+ 
+     MaxBlockSize = args.MaxBlockSize;
+     LiteralOptimizations = args.LiteralOptimizations;
+     BranchOptimizations = args.BranchOptimizations;
++    DirectBlockLinking9 = args.DirectBlockLinking9;
++    DirectBlockLinking7 = args.DirectBlockLinking7;
+     FastMemory = args.FastMemory;
+ }
+diff --git a/src/ARMJIT.h b/src/ARMJIT.h
+index a228a4dd..810f00ae 100644
+--- a/src/ARMJIT.h
++++ b/src/ARMJIT.h
+@@ -51,6 +51,8 @@ public:
+         MaxBlockSize(jit.has_value() ? std::clamp(jit->MaxBlockSize, 1u, 32u) : 32),
+         LiteralOptimizations(jit.has_value() ? jit->LiteralOptimizations : false),
+         BranchOptimizations(jit.has_value() ? jit->BranchOptimizations : false),
++        DirectBlockLinking9(jit.has_value() ? jit->DirectBlockLinking9 : false),
++        DirectBlockLinking7(jit.has_value() ? jit->DirectBlockLinking7 : false),
+         FastMemory(jit.has_value() ? jit->FastMemory : false)
+     {}
+     ~ARMJIT() noexcept;
+@@ -79,6 +81,8 @@ private:
+     int MaxBlockSize {};
+     bool LiteralOptimizations = false;
+     bool BranchOptimizations = false;
++    bool DirectBlockLinking9 = false;
++    bool DirectBlockLinking7 = false;
+     bool FastMemory = false;
+ public:
+     melonDS::NDS& NDS;
+@@ -90,6 +94,8 @@ public:
+     int GetMaxBlockSize() const noexcept { return MaxBlockSize; }
+     bool LiteralOptimizationsEnabled() const noexcept { return LiteralOptimizations; }
+     bool BranchOptimizationsEnabled() const noexcept { return BranchOptimizations; }
++    bool DirectBlockLinking9Enabled() const noexcept { return DirectBlockLinking9; }
++    bool DirectBlockLinking7Enabled() const noexcept { return DirectBlockLinking7; }
+     bool FastMemoryEnabled() const noexcept { return FastMemory; }
+ 
+     void SetJITArgs(JITArgs args) noexcept;
+diff --git a/src/Args.h b/src/Args.h
+index 670c5716..054522f4 100644
+--- a/src/Args.h
++++ b/src/Args.h
+@@ -62,6 +62,14 @@ struct JITArgs
+     bool LiteralOptimizations = true;
+     bool BranchOptimizations = true;
+ 
++    /// Enable direct block linking (tail-jump to already-compiled targets)
++    /// to reduce dispatcher overhead.
++    ///
++    /// These options are intentionally split by CPU so frontends can roll out
++    /// the optimization gradually.
++    bool DirectBlockLinking9 = false;
++    bool DirectBlockLinking7 = false;
++
+     /// Ignored in builds that have fast memory excluded
+     /// (even if the JIT is otherwise available).
+     /// Enabled by default, but frontends should disable this when debugging

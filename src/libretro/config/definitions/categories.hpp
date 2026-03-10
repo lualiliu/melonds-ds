@@ -25,6 +25,11 @@
 namespace MelonDsDs::config::definitions {
     constexpr std::array OptionCategories {
         retro_core_option_v2_category {
+            MelonDsDs::config::performance::CATEGORY,
+            "Performance",
+            "Speed-first settings that may reduce accuracy."
+        },
+        retro_core_option_v2_category {
             MelonDsDs::config::system::CATEGORY,
             "System",
             "Change system settings."

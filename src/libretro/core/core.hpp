@@ -169,6 +169,8 @@ namespace MelonDsDs {
         bool _ndsSramInstalled = false;
         bool _deferredInitializationPending = false;
         uint32_t _flushTaskId = 0;
+        uint64_t _frameCounter = 0;
+        uint32_t _consecutiveSkippedPresents = 0;
     };
 }
 #endif //MELONDSDS_CORE_HPP

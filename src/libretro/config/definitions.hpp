@@ -26,6 +26,7 @@
 #include "config/definitions/firmware.hpp"
 #include "config/definitions/network.hpp"
 #include "config/definitions/osd.hpp"
+#include "config/definitions/performance.hpp"
 #include "config/definitions/screen.hpp"
 #include "config/definitions/system.hpp"
 #include "config/definitions/time.hpp"
@@ -35,6 +36,12 @@
 
 namespace MelonDsDs::config::definitions {
     constexpr std::array CoreOptionDefinitions {
+        Profile,
+        Frameskip,
+        AudioFastMode,
+        VideoFastMode,
+        JitFastPreset,
+
         MicInput,
         MicInputButton,
         BitDepth,
@@ -48,6 +55,7 @@ namespace MelonDsDs::config::definitions {
 #   ifdef HAVE_JIT_FASTMEM
         JitFastMemory,
 #   endif
+        JitDirectBlockLinking,
 #endif
 
         LanMacAddressMode,

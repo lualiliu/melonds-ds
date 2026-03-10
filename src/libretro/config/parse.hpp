@@ -72,6 +72,20 @@ namespace MelonDsDs {
         return std::nullopt;
     }
 
+    constexpr std::optional<MelonDsDs::EmulationProfile> ParseEmulationProfile(std::string_view value) noexcept {
+        if (value == config::values::ACCURATE) return EmulationProfile::Accurate;
+        if (value == config::values::SPEED) return EmulationProfile::Speed;
+        return std::nullopt;
+    }
+
+    constexpr std::optional<MelonDsDs::FrameskipMode> ParseFrameskipMode(std::string_view value) noexcept {
+        if (value == config::values::OFF) return FrameskipMode::Off;
+        if (value == "1") return FrameskipMode::_1;
+        if (value == "2") return FrameskipMode::_2;
+        if (value == config::values::AUTO) return FrameskipMode::Auto;
+        return std::nullopt;
+    }
+
     constexpr std::optional<MelonDsDs::SysfileMode> ParseSysfileMode(std::string_view value) noexcept {
         if (value == config::values::NATIVE) return SysfileMode::Native;
         if (value == config::values::BUILT_IN) return SysfileMode::BuiltIn;

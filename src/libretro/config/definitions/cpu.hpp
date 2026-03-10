@@ -145,6 +145,24 @@ namespace MelonDsDs::config::definitions {
 #       endif
     };
 #   endif
+
+    constexpr retro_core_option_v2_definition JitDirectBlockLinking {
+        config::cpu::JIT_DIRECT_BLOCK_LINKING,
+        "Direct Block Linking (ARM9/ARM7)",
+        nullptr,
+        "Reduce JIT dispatch overhead by directly tail-jumping to already-compiled blocks.\n"
+        "\n"
+        "This is an aggressive optimization and may reduce stability.\n"
+        "Takes effect at next restart.",
+        nullptr,
+        MelonDsDs::config::cpu::CATEGORY,
+        {
+            {MelonDsDs::config::values::DISABLED, nullptr},
+            {MelonDsDs::config::values::ENABLED, nullptr},
+            {nullptr, nullptr},
+        },
+        MelonDsDs::config::values::DISABLED
+    };
 #endif
 
     constexpr std::initializer_list<retro_core_option_v2_definition> CpuOptionDefinitions {
@@ -156,6 +174,7 @@ namespace MelonDsDs::config::definitions {
 #   ifdef HAVE_JIT_FASTMEM
         JitFastMemory,
 #   endif
+        JitDirectBlockLinking,
 #endif
     };
 }

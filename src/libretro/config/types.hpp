@@ -20,6 +20,18 @@
 #include <cstdint>
 
 namespace MelonDsDs {
+    enum class EmulationProfile {
+        Accurate,
+        Speed,
+    };
+
+    enum class FrameskipMode {
+        Off,
+        _1,
+        _2,
+        Auto,
+    };
+
     enum class ConsoleType {
         DS = 0,
         DSi = 1,

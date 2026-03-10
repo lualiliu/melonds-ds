@@ -70,6 +70,12 @@ set(GLM_ENABLE_CXX_17 ON CACHE BOOL "" FORCE)
 option(ENABLE_TESTING "Enable unit testing." OFF)
 FetchContent_MakeAvailable(melonDS libretro-common embed-binaries glm zlib libslirp pntr fmt yamc span-lite date)
 
+option(MELONDSDS_APPLY_UPSTREAM_PATCHES "Apply local patches to upstream FetchContent dependencies." ON)
+if (MELONDSDS_APPLY_UPSTREAM_PATCHES)
+    include(ApplyGitPatches)
+    apply_git_patches("${melonDS_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/third_party/melonds/patches")
+endif ()
+
 if (TRACY_ENABLE)
     set(BUILD_SHARED_LIBS OFF)
     option(TRACY_DELAYED_INIT "" ON)

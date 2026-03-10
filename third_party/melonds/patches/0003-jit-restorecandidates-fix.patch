@@ -1,0 +1,14 @@
+diff --git a/src/ARMJIT.cpp b/src/ARMJIT.cpp
+index 5d3e2c29..5b567c46 100644
+--- a/src/ARMJIT.cpp
++++ b/src/ARMJIT.cpp
+@@ -883,9 +883,6 @@ void ARMJIT::CompileBlock(ARM* cpu) noexcept
+     JitBlock* block;
+     if (!mayRestore)
+     {
+-        if (prevBlock)
+-            delete prevBlock;
+-
+         block = new JitBlock(cpu->Num, i, numAddressRanges, numLiterals);
+         block->LiteralHash = literalHash;
+         block->InstrHash = instrHash;

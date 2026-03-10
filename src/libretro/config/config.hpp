@@ -70,6 +70,32 @@ namespace MelonDsDs {
     // TODO: Get rid of most of the getters/setters
     class CoreConfig {
     public:
+        [[nodiscard]] EmulationProfile Profile() const noexcept { return _profile; }
+        void SetProfile(EmulationProfile profile) noexcept { _profile = profile; }
+
+        [[nodiscard]] FrameskipMode Frameskip() const noexcept { return _frameskip; }
+        void SetFrameskip(FrameskipMode frameskip) noexcept { _frameskip = frameskip; }
+
+        [[nodiscard]] bool AudioFastMode() const noexcept { return _audioFastMode; }
+        void SetAudioFastMode(bool enabled) noexcept { _audioFastMode = enabled; }
+
+        [[nodiscard]] bool VideoFastMode() const noexcept { return _videoFastMode; }
+        void SetVideoFastMode(bool enabled) noexcept { _videoFastMode = enabled; }
+
+        [[nodiscard]] bool JitFastPreset() const noexcept { return _jitFastPreset; }
+        void SetJitFastPreset(bool enabled) noexcept { _jitFastPreset = enabled; }
+
+        [[nodiscard]] FrameskipMode EffectiveFrameskip() const noexcept {
+            if (_profile == EmulationProfile::Speed && _frameskip == FrameskipMode::Off) {
+                return FrameskipMode::Auto;
+            }
+            return _frameskip;
+        }
+
+        [[nodiscard]] bool EffectiveAudioFastMode() const noexcept { return _profile == EmulationProfile::Speed || _audioFastMode; }
+        [[nodiscard]] bool EffectiveVideoFastMode() const noexcept { return _profile == EmulationProfile::Speed || _videoFastMode; }
+        [[nodiscard]] bool EffectiveJitFastPreset() const noexcept { return _profile == EmulationProfile::Speed || _jitFastPreset; }
+
         [[nodiscard]] MelonDsDs::MicButtonMode MicButtonMode() const noexcept { return _micButtonMode; }
         void SetMicButtonMode(MelonDsDs::MicButtonMode mode) noexcept { _micButtonMode = mode; }
 
@@ -142,6 +168,11 @@ namespace MelonDsDs {
 
         [[nodiscard]] bool BranchOptimizations() const noexcept { return _branchOptimizations; }
         void SetBranchOptimizations(bool enable) noexcept { _branchOptimizations = enable; }
+
+#   ifdef JIT_ENABLED
+        [[nodiscard]] bool DirectBlockLinking() const noexcept { return _directBlockLinking; }
+        void SetDirectBlockLinking(bool enable) noexcept { _directBlockLinking = enable; }
+#   endif
 
 #   ifdef HAVE_JIT_FASTMEM
         [[nodiscard]] bool FastMemory() const noexcept { return _fastMemory; }
@@ -391,6 +422,11 @@ namespace MelonDsDs {
         void SetUseRealLightSensor(bool enabled) noexcept { _useRealLightSensor = enabled; }
     private:
         void CustomizeFirmware(melonDS::Firmware& firmware);
+        EmulationProfile _profile = EmulationProfile::Accurate;
+        FrameskipMode _frameskip = FrameskipMode::Off;
+        bool _audioFastMode = false;
+        bool _videoFastMode = false;
+        bool _jitFastPreset = false;
         MelonDsDs::MicButtonMode _micButtonMode = MelonDsDs::MicButtonMode::Hold;
         MelonDsDs::MicInputMode _micInputMode = *ParseMicInputMode(config::definitions::MicInput.default_value);
         melonDS::AudioBitDepth _bitDepth;
@@ -413,6 +449,7 @@ namespace MelonDsDs {
         unsigned _maxBlockSize;
         bool _literalOptimizations;
         bool _branchOptimizations;
+        bool _directBlockLinking = false;
 #   ifdef HAVE_JIT_FASTMEM
         bool _fastMemory;
 #   endif

@@ -366,11 +366,22 @@ void MelonDsDs::OpenGLRenderState::Render(
     melonDS::NDS& nds,
     const InputState& input,
     const CoreConfig& config,
-    const ScreenLayoutData& screenLayout
+    const ScreenLayoutData& screenLayout,
+    bool skipPresent
 ) noexcept {
     ZoneScopedN(TracyFunction);
     TracyGpuZone(TracyFunction);
     retro_assert(nds.GetRenderer3D().Accelerated);
+
+    if (skipPresent) {
+        retro::video_refresh(
+            RETRO_HW_FRAME_BUFFER_VALID,
+            screenLayout.BufferWidth(),
+            screenLayout.BufferHeight(),
+            0
+        );
+        return;
+    }
 
     glsm_ctl(GLSM_CTL_STATE_BIND, nullptr);
 

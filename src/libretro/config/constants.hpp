@@ -40,6 +40,15 @@ namespace retro {
 namespace MelonDsDs::config {
     constexpr unsigned DS_NAME_LIMIT = 10;
 
+    namespace performance {
+        static constexpr const char* const CATEGORY = "performance";
+        static constexpr const char* const PROFILE = "melonds_profile";
+        static constexpr const char* const FRAMESKIP = "melonds_frameskip";
+        static constexpr const char* const AUDIO_FAST_MODE = "melonds_audio_fast_mode";
+        static constexpr const char* const VIDEO_FAST_MODE = "melonds_video_fast_mode";
+        static constexpr const char* const JIT_FAST_PRESET = "melonds_jit_fast_preset";
+    }
+
     namespace audio {
         static constexpr const char *const CATEGORY = "audio";
         static constexpr const char *const AUDIO_BITDEPTH = "melonds_audio_bitdepth";
@@ -55,6 +64,7 @@ namespace MelonDsDs::config {
         static constexpr const char *const JIT_ENABLE = "melonds_jit_enable";
         static constexpr const char *const JIT_FAST_MEMORY = "melonds_jit_fast_memory";
         static constexpr const char *const JIT_LITERAL_OPTIMISATIONS = "melonds_jit_literal_optimisations";
+        static constexpr const char *const JIT_DIRECT_BLOCK_LINKING = "melonds_jit_direct_block_linking";
     }
 
     namespace firmware {
@@ -199,6 +209,7 @@ namespace MelonDsDs::config {
         static constexpr const char *const ABSOLUTE_TIME = "absolute";
         static constexpr const char *const ALWAYS = "always";
         static constexpr const char *const AUTO = "auto";
+        static constexpr const char *const ACCURATE = "accurate";
         static constexpr const char *const BLOW = "blow";
         static constexpr const char *const BOTTOM_TOP = "bottom-top";
         static constexpr const char *const BOTH = "both";
@@ -238,6 +249,7 @@ namespace MelonDsDs::config {
         static constexpr const char *const MOUSE = "mouse";
         static constexpr const char *const NOISE = "noise";
         static constexpr const char *const NOT_FOUND = "/notfound";
+        static constexpr const char *const OFF = "off";
         static constexpr const char *const ONE = "one";
         static constexpr const char *const OPENGL = "opengl";
         static constexpr const char *const REAL = "real";
@@ -250,6 +262,7 @@ namespace MelonDsDs::config {
         static constexpr const char *const SHARED = "shared";
         static constexpr const char *const SILENCE = "silence";
         static constexpr const char *const SOFTWARE = "software";
+        static constexpr const char *const SPEED = "speed";
         static constexpr const char *const SPANISH = "es";
         static constexpr const char *const START = "start";
         static constexpr const char *const STRONG = "strong";

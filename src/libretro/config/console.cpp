@@ -418,12 +418,22 @@ static void MelonDsDs::ApplyCommonArgs(const CoreConfig& config, melonDS::NDSArg
     ZoneScopedN(TracyFunction);
     args.Interpolation = config.Interpolation();
     args.BitDepth = config.BitDepth();
+    args.Speedhacks = {
+        .SpeedFirst = config.Profile() == EmulationProfile::Speed,
+        .CoarseTiming = config.Profile() == EmulationProfile::Speed,
+        .Fast3D = config.Profile() == EmulationProfile::Speed,
+        .FastAudio = config.EffectiveAudioFastMode(),
+    };
 #ifdef JIT_ENABLED
     if (config.JitEnable()) {
         args.JIT = {
             .MaxBlockSize = config.MaxBlockSize(),
             .LiteralOptimizations = config.LiteralOptimizations(),
             .BranchOptimizations = config.BranchOptimizations(),
+            // Roll out aggressive JIT features gradually:
+            // Phase 1 enables direct block linking; can be toggled per frontend option.
+            .DirectBlockLinking9 = config.DirectBlockLinking(),
+            .DirectBlockLinking7 = config.DirectBlockLinking(),
 #   ifdef HAVE_JIT_FASTMEM
             .FastMemory = config.FastMemory(),
 #   else

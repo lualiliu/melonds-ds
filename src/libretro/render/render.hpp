@@ -42,14 +42,14 @@ namespace MelonDsDs {
         /// Returns true if all state necessary for rendering is ready.
         /// This includes the OpenGL context (if applicable) and the emulator's renderer.
         virtual bool Ready() const noexcept = 0;
-        virtual void Render(melonDS::NDS& nds, const InputState& input, const CoreConfig& config, const ScreenLayoutData& screenLayout) noexcept = 0;
+        virtual void Render(melonDS::NDS& nds, const InputState& input, const CoreConfig& config, const ScreenLayoutData& screenLayout, bool skipPresent) noexcept = 0;
         virtual void RequestRefresh() noexcept {}
     };
 
     class RenderStateWrapper {
     public:
         bool Ready() const noexcept { return _renderState && _renderState->Ready(); }
-        void Render(melonDS::NDS& nds, const InputState& input, const CoreConfig& config, const ScreenLayoutData& screenLayout) noexcept;
+        void Render(melonDS::NDS& nds, const InputState& input, const CoreConfig& config, const ScreenLayoutData& screenLayout, bool skipPresent) noexcept;
         void Render(const error::ErrorScreen& error, const CoreConfig& config, const ScreenLayoutData& screenLayout) noexcept;
         void RequestRefresh() noexcept {
             if (_renderState) {

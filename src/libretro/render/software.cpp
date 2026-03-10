@@ -18,6 +18,10 @@
 
 #include <retro_assert.h>
 
+#if defined(__aarch64__) && defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 #include <NDS.h>
 #include <gfx/scaler/pixconv.h>
 
@@ -53,7 +57,8 @@ void MelonDsDs::SoftwareRenderState::Render(
     melonDS::NDS& nds,
     const InputState& inputState,
     const CoreConfig& config,
-    const ScreenLayoutData& screenLayout
+    const ScreenLayoutData& screenLayout,
+    bool skipPresent
 ) noexcept {
     ZoneScopedN(TracyFunction);
 
@@ -70,14 +75,16 @@ void MelonDsDs::SoftwareRenderState::Render(
 
     const uint32_t* topScreenBuffer = nds.GPU.Framebuffer[nds.GPU.FrontBuffer][0].get();
     const uint32_t* bottomScreenBuffer = nds.GPU.Framebuffer[nds.GPU.FrontBuffer][1].get();
-    CombineScreens(
-        span<const uint32_t, NDS_SCREEN_AREA<size_t>>(topScreenBuffer, NDS_SCREEN_AREA<size_t>),
-        span<const uint32_t, NDS_SCREEN_AREA<size_t>>(bottomScreenBuffer, NDS_SCREEN_AREA<size_t>),
-        screenLayout
-    );
+    if (!skipPresent) {
+        CombineScreens(
+            span<const uint32_t, NDS_SCREEN_AREA<size_t>>(topScreenBuffer, NDS_SCREEN_AREA<size_t>),
+            span<const uint32_t, NDS_SCREEN_AREA<size_t>>(bottomScreenBuffer, NDS_SCREEN_AREA<size_t>),
+            screenLayout
+        );
 
-    if (!nds.IsLidClosed() && inputState.CursorVisible()) {
-        DrawCursor(inputState, config, screenLayout);
+        if (!nds.IsLidClosed() && inputState.CursorVisible()) {
+            DrawCursor(inputState, config, screenLayout);
+        }
     }
 
     retro::video_refresh(buffer[0], buffer.Width(), buffer.Height(), buffer.Stride());
@@ -149,10 +156,30 @@ void MelonDsDs::SoftwareRenderState::DrawCursor(const InputState& input, const C
     uvec2 end = clamp(transformedTouch + ivec2(cursorSize), ivec2(0), ivec2(buffer.Size()));
 
     for (uint32_t y = start.y; y < end.y; y++) {
-        for (uint32_t x = start.x; x < end.x; x++) {
-            // TODO: Replace with SIMD (does GLM have a SIMD version of this?)
+        uint32_t x = start.x;
+
+#if defined(__aarch64__) && defined(__ARM_NEON)
+        {
+            uint32_t* row = buffer[y] + start.x;
+            const uint32_t width = end.x - start.x;
+
+            const uint32x4_t maskRgb = vdupq_n_u32(0x00FFFFFFu);
+            const uint32x4_t maskA = vdupq_n_u32(0xFF000000u);
+
+            uint32_t i = 0;
+            for (; i + 4 <= width; i += 4) {
+                uint32x4_t v = vld1q_u32(row + i);
+                v = veorq_u32(v, maskRgb); // invert RGB
+                v = vorrq_u32(v, maskA);   // force alpha=0xFF
+                vst1q_u32(row + i, v);
+            }
+            x = start.x + i;
+        }
+#endif
+
+        for (; x < end.x; x++) {
             uint32_t& pixel = buffer[uvec2(x, y)];
-            pixel = (0xFFFFFF - pixel) | 0xFF000000;
+            pixel = (pixel ^ 0x00FFFFFFu) | 0xFF000000u;
         }
     }
 }

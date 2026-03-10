@@ -106,6 +106,7 @@ const initializer_list<int> RELATIVE_DAY_OFFSETS = {
 };
 
 namespace MelonDsDs::config {
+    static void ParsePerformanceOptions(CoreConfig& config) noexcept;
     static void ParseSystemOptions(CoreConfig& config) noexcept;
     static void ParseTimeOptions(CoreConfig& config) noexcept;
     static void ParseOsdOptions(CoreConfig& config) noexcept;
@@ -147,6 +148,7 @@ namespace MelonDsDs::config::definitions {
 
 void MelonDsDs::ParseConfig(CoreConfig& config) noexcept {
     ZoneScopedN(TracyFunction);
+    config::ParsePerformanceOptions(config);
     config::ParseSystemOptions(config);
     config::ParseTimeOptions(config);
     config::ParseOsdOptions(config);
@@ -158,6 +160,47 @@ void MelonDsDs::ParseConfig(CoreConfig& config) noexcept {
     config::ParseNetworkOptions(config);
     config::ParseScreenOptions(config);
     config::ParseVideoOptions(config);
+}
+
+static void MelonDsDs::config::ParsePerformanceOptions(CoreConfig& config) noexcept {
+    ZoneScopedN(TracyFunction);
+    using namespace MelonDsDs::config::performance;
+    using retro::get_variable;
+
+    if (optional<EmulationProfile> value = ParseEmulationProfile(get_variable(PROFILE))) {
+        config.SetProfile(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", PROFILE, values::ACCURATE);
+        config.SetProfile(EmulationProfile::Accurate);
+    }
+
+    if (optional<FrameskipMode> value = ParseFrameskipMode(get_variable(FRAMESKIP))) {
+        config.SetFrameskip(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", FRAMESKIP, values::OFF);
+        config.SetFrameskip(FrameskipMode::Off);
+    }
+
+    if (optional<bool> value = ParseBoolean(get_variable(AUDIO_FAST_MODE))) {
+        config.SetAudioFastMode(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", AUDIO_FAST_MODE, values::DISABLED);
+        config.SetAudioFastMode(false);
+    }
+
+    if (optional<bool> value = ParseBoolean(get_variable(VIDEO_FAST_MODE))) {
+        config.SetVideoFastMode(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", VIDEO_FAST_MODE, values::DISABLED);
+        config.SetVideoFastMode(false);
+    }
+
+    if (optional<bool> value = ParseBoolean(get_variable(JIT_FAST_PRESET))) {
+        config.SetJitFastPreset(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", JIT_FAST_PRESET, values::DISABLED);
+        config.SetJitFastPreset(false);
+    }
 }
 
 static void MelonDsDs::config::ParseSystemOptions(CoreConfig& config) noexcept {
@@ -404,6 +447,15 @@ static void MelonDsDs::config::ParseJitOptions(CoreConfig& config) noexcept {
         config.SetLiteralOptimizations(true);
     }
 
+#ifdef JIT_ENABLED
+    if (optional<bool> value = ParseBoolean(get_variable(cpu::JIT_DIRECT_BLOCK_LINKING))) {
+        config.SetDirectBlockLinking(*value);
+    } else {
+        retro::warn("Failed to get value for {}; defaulting to {}", cpu::JIT_DIRECT_BLOCK_LINKING, values::DISABLED);
+        config.SetDirectBlockLinking(false);
+    }
+#endif
+
 #ifdef HAVE_JIT_FASTMEM
     if (optional<bool> value = ParseBoolean(get_variable(cpu::JIT_FAST_MEMORY))) {
         config.SetFastMemory(*value);
@@ -417,6 +469,23 @@ static void MelonDsDs::config::ParseJitOptions(CoreConfig& config) noexcept {
 #endif
     }
 #endif
+
+    if (config.EffectiveJitFastPreset()) {
+        config.SetJitEnable(true);
+        config.SetMaxBlockSize(32);
+        config.SetBranchOptimizations(true);
+        config.SetLiteralOptimizations(true);
+#ifdef JIT_ENABLED
+        config.SetDirectBlockLinking(true);
+#endif
+#ifdef HAVE_JIT_FASTMEM
+#ifdef NDEBUG
+        config.SetFastMemory(true);
+#else
+        config.SetFastMemory(false);
+#endif
+#endif
+    }
 #endif
 }
 
@@ -648,6 +717,11 @@ static void MelonDsDs::config::ParseAudioOptions(CoreConfig& config) noexcept {
         retro::warn("Failed to get value for {}; defaulting to {}", AUDIO_INTERPOLATION, values::DISABLED);
         config.SetInterpolation(AudioInterpolation::None);
     }
+
+    if (config.EffectiveAudioFastMode()) {
+        config.SetInterpolation(AudioInterpolation::None);
+        config.SetBitDepth(AudioBitDepth::_10Bit);
+    }
 }
 
 static void MelonDsDs::config::ParseNetworkOptions(CoreConfig& config) noexcept {
@@ -839,6 +913,15 @@ static void MelonDsDs::config::ParseVideoOptions(CoreConfig& config) noexcept {
         config.SetBetterPolygonSplitting(false);
     }
 #endif
+
+    if (config.EffectiveVideoFastMode()) {
+        config.SetConfiguredRenderer(RenderMode::Software);
+        config.SetScaleFactor(1);
+        config.SetBetterPolygonSplitting(false);
+#if defined(HAVE_THREADS) && defined(HAVE_THREADED_RENDERER)
+        config.SetThreadedSoftRenderer(true);
+#endif
+    }
 }
 
 struct FirmwareEntry {
