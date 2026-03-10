@@ -48,13 +48,17 @@ index 7d453565..f4df69be 100644
      ARM7BIOS(*args.ARM7BIOS),
      ARM9BIOS(*args.ARM9BIOS),
      ARM7BIOSNative(CRC32(ARM7BIOS.data(), ARM7BIOS.size()) == ARM7BIOSCRC32),
-@@ -811,9 +812,11 @@ u64 NDS::NextTarget()
+@@ -811,9 +812,15 @@ u64 NDS::NextTarget()
          mask >>= 1;
      }
  
 -    u64 max = SysTimestamp + kMaxIterationCycles;
-+    const s32 iterationCycles = Speedhacks.CoarseTiming ? 256 : kMaxIterationCycles;
-+    const s32 iterationMargin = Speedhacks.CoarseTiming ? 32 : kIterationCycleMargin;
++    const s32 iterationCycles = Speedhacks.CoarseTiming
++        ? (Speedhacks.SpeedFirst ? 512 : 256)
++        : kMaxIterationCycles;
++    const s32 iterationMargin = Speedhacks.CoarseTiming
++        ? (Speedhacks.SpeedFirst ? 64 : 32)
++        : kIterationCycleMargin;
 +    u64 max = SysTimestamp + iterationCycles;
  
 -    if (minEvent < max + kIterationCycleMargin)
@@ -70,26 +74,38 @@ index 7d453565..f4df69be 100644
  
      LagFrameFlag = true;
      bool runFrame = Running && !(CPUStop & CPUStop_Sleep);
-@@ -993,7 +997,11 @@ u32 NDS::RunFrame()
+@@ -993,7 +997,19 @@ u32 NDS::RunFrame()
                  }
  
                  RunTimers(0);
 -                GPU.GPU3D.Run();
-+                if (!Speedhacks.Fast3D || (ARM9Timestamp >> ARM9ClockShift) - last3DRunTimestamp >= 64)
++                const u64 cur3DTimestamp = ARM9Timestamp >> ARM9ClockShift;
++                const u64 min3DDelta = Speedhacks.Fast3D
++                    ? (Speedhacks.SpeedFirst ? 256 : 64)
++                    : 0;
++
++                // In non-fast-3D mode, always run the 3D core;
++                // otherwise, throttle based on the chosen speedhack level.
++                if (!Speedhacks.Fast3D
++                    || (cur3DTimestamp - last3DRunTimestamp) >= min3DDelta)
 +                {
 +                    GPU.GPU3D.Run();
-+                    last3DRunTimestamp = (ARM9Timestamp >> ARM9ClockShift);
++                    last3DRunTimestamp = cur3DTimestamp;
 +                }
  
                  target = ARM9Timestamp >> ARM9ClockShift;
                  CurCPU = 1;
-@@ -1041,7 +1049,8 @@ u32 NDS::RunFrame()
+@@ -1041,7 +1053,12 @@ u32 NDS::RunFrame()
              ARM7Timestamp-SysTimestamp,
              GPU.GPU3D.Timestamp-SysTimestamp);
  #endif
 -        SPU.TransferOutput();
-+        if (!Speedhacks.FastAudio || ((NumFrames & 1) == 0))
++        
++        
++        
++        
 +            SPU.TransferOutput();
++        
          break;
      }
  
