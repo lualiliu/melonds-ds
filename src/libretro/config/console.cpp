@@ -426,14 +426,12 @@ static void MelonDsDs::ApplyCommonArgs(const CoreConfig& config, melonDS::NDSArg
     };
 #ifdef JIT_ENABLED
     if (config.JitEnable()) {
-        args.JIT = {
+        args.JIT = melonDS::JITArgs{
             .MaxBlockSize = config.MaxBlockSize(),
             .LiteralOptimizations = config.LiteralOptimizations(),
             .BranchOptimizations = config.BranchOptimizations(),
             // Roll out aggressive JIT features gradually:
             // Phase 1 enables direct block linking; can be toggled per frontend option.
-            .DirectBlockLinking9 = config.DirectBlockLinking(),
-            .DirectBlockLinking7 = config.DirectBlockLinking(),
 #   ifdef HAVE_JIT_FASTMEM
             .FastMemory = config.FastMemory(),
 #   else
