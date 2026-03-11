@@ -25,6 +25,16 @@ project("melonDS DS"
     LANGUAGES C CXX)
 
 message(STATUS "Configuring a ${CMAKE_BUILD_TYPE} build.")
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
+if (ipo_supported)
+    # Enable LTO/IPO by default for Release-like builds
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+    message(STATUS "LTO/IPO enabled by default for Release and RelWithDebInfo.")
+else ()
+    message(WARNING "LTO/IPO not supported by this toolchain: ${ipo_output}")
+endif ()
 if (APPLE)
     message(STATUS "CMAKE_OSX_ARCHITECTURES: ${CMAKE_OSX_ARCHITECTURES}")
 endif ()
